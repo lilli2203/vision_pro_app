@@ -8,6 +8,15 @@ class ViewModel: ObservableObject {
     @Published var panelTitle: String = "Select a Panel"
     @Published var panelOptions: [String] = ["Panel 1", "Panel 2", "Panel 3"]
     @Published var selectedPanel: String? = nil
+    
+    func addPanel() {
+        let newPanel = "Panel \(panelOptions.count + 1)"
+        panelOptions.append(newPanel)
+    }
+    
+    func removePanel(at offsets: IndexSet) {
+        panelOptions.remove(atOffsets: offsets)
+    }
 }
 
 struct ContentView: View {
@@ -19,6 +28,20 @@ struct ContentView: View {
                 .font(.largeTitle)
                 .padding()
             PanelSelectionView()
+            HStack {
+                Button(action: {
+                    viewModel.addPanel()
+                }) {
+                    Text("Add Panel")
+                }
+                .padding()
+                Button(action: {
+                    viewModel.panelOptions.removeAll()
+                }) {
+                    Text("Clear All Panels")
+                }
+                .padding()
+            }
         }
     }
 }
@@ -27,12 +50,15 @@ struct PanelSelectionView: View {
     @EnvironmentObject var viewModel: ViewModel
     
     var body: some View {
-        List(viewModel.panelOptions, id: \.self) { panel in
-            Button(action: {
-                viewModel.selectedPanel = panel
-            }) {
-                Text(panel)
+        List {
+            ForEach(viewModel.panelOptions, id: \.self) { panel in
+                Button(action: {
+                    viewModel.selectedPanel = panel
+                }) {
+                    Text(panel)
+                }
             }
+            .onDelete(perform: viewModel.removePanel)
         }
         .listStyle(GroupedListStyle())
         .navigationTitle("Panels")
@@ -55,7 +81,6 @@ struct PanelDetailView: View {
     }
 }
 
-// Additional view demonstrating interaction
 struct InteractionView: View {
     @EnvironmentObject var viewModel: ViewModel
     
