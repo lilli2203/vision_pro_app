@@ -13,6 +13,7 @@ class ViewModel: ObservableObject {
         "Panel 2": "Details for Panel 2",
         "Panel 3": "Details for Panel 3"
     ]
+    @Published var searchText: String = ""
     
     func addPanel() {
         let newPanel = "Panel \(panelOptions.count + 1)"
@@ -30,6 +31,14 @@ class ViewModel: ObservableObject {
     
     func updatePanelDetail(panel: String, detail: String) {
         panelDetails[panel] = detail
+    }
+    
+    func filteredPanels() -> [String] {
+        if searchText.isEmpty {
+            return panelOptions
+        } else {
+            return panelOptions.filter { $0.contains(searchText) }
+        }
     }
 }
 
@@ -64,20 +73,26 @@ struct PanelSelectionView: View {
     @EnvironmentObject var viewModel: ViewModel
     
     var body: some View {
-        List {
-            ForEach(viewModel.panelOptions, id: \.self) { panel in
-                Button(action: {
-                    viewModel.selectedPanel = panel
-                }) {
-                    Text(panel)
+        VStack {
+            TextField("Search Panels", text: $viewModel.searchText)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            List {
+                ForEach(viewModel.filteredPanels(), id: \.self) { panel in
+                    Button(action: {
+                        viewModel.selectedPanel = panel
+                    }) {
+                        Text(panel)
+                    }
                 }
+                .onDelete(perform: viewModel.removePanel)
             }
-            .onDelete(perform: viewModel.removePanel)
-        }
-        .listStyle(GroupedListStyle())
-        .navigationTitle("Panels")
-        .onAppear {
-            print("PanelSelectionView appeared")
+            .listStyle(GroupedListStyle())
+            .navigationTitle("Panels")
+            .onAppear {
+                print("PanelSelectionView appeared")
+            }
         }
     }
 }
