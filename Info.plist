@@ -2,14 +2,103 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UIApplicationPreferredDefaultSceneSessionRole</key>
-		<string>UIWindowSceneSessionRoleApplication</string>
-		<key>UIApplicationSupportsMultipleScenes</key>
-		<true/>
-		<key>UISceneConfigurations</key>
-		<dict/>
-	</dict>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationPreferredDefaultSceneSessionRole</key>
+        <string>UIWindowSceneSessionRoleApplication</string>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <true/>
+        <key>UISceneConfigurations</key>
+        <dict>
+            <key>UIWindowSceneSessionRoleApplication</key>
+            <array>
+                <dict>
+                    <key>UISceneConfigurationName</key>
+                    <string>Default Configuration</string>
+                    <key>UISceneDelegateClassName</key>
+                    <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+                    <key>UISceneStoryboardFile</key>
+                    <string>Main</string>
+                </dict>
+                <dict>
+                    <key>UISceneConfigurationName</key>
+                    <string>Secondary Configuration</string>
+                    <key>UISceneDelegateClassName</key>
+                    <string>$(PRODUCT_MODULE_NAME).SecondarySceneDelegate</string>
+                    <key>UISceneStoryboardFile</key>
+                    <string>Secondary</string>
+                </dict>
+            </array>
+            <key>UIWindowSceneSessionRoleExternalDisplay</key>
+            <array>
+                <dict>
+                    <key>UISceneConfigurationName</key>
+                    <string>External Display Configuration</string>
+                    <key>UISceneDelegateClassName</key>
+                    <string>$(PRODUCT_MODULE_NAME).ExternalSceneDelegate</string>
+                    <key>UISceneStoryboardFile</key>
+                    <string>ExternalDisplay</string>
+                </dict>
+            </array>
+        </dict>
+    </dict>
+    <key>UIAppFonts</key>
+    <array>
+        <string>Fonts/CustomFont1.ttf</string>
+        <string>Fonts/CustomFont2.otf</string>
+    </array>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UILaunchImages</key>
+    <array>
+        <dict>
+            <key>UILaunchImageName</key>
+            <string>LaunchImage</string>
+            <key>UILaunchImageMinimumOSVersion</key>
+            <string>12.0</string>
+            <key>UILaunchImageOrientation</key>
+            <string>Portrait</string>
+            <key>UILaunchImageSize</key>
+            <string>{375, 667}</string>
+        </dict>
+    </array>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>example.com</key>
+            <dict>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+                <key>NSTemporaryExceptionMinimumTLSVersion</key>
+                <string>TLSv1.0</string>
+            </dict>
+        </dict>
+    </dict>
+    <key>NSCameraUsageDescription</key>
+    <string>This app requires access to the camera to take photos and videos.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app requires access to the photo library to save and display photos.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app requires access to your location while you are using the app.</string>
+    <key>UIUserInterfaceStyle</key>
+    <string>Automatic</string>
+    <key>UISupportedExternalAccessoryProtocols</key>
+    <array>
+        <string>com.example.protocol</string>
+    </array>
 </dict>
 </plist>
