@@ -13,6 +13,7 @@ class ViewModel: ObservableObject {
     ]
     @Published var searchText: String = ""
     @Published var doodlePoints: [CGPoint] = []
+    @Published var panelDescription: String = "Default Description"
     
     func addPanel() {
         let newPanel = "Panel \(panelOptions.count + 1)"
@@ -187,6 +188,7 @@ struct SettingsView: View {
     @EnvironmentObject var viewModel: ViewModel
     
     @State private var panelTitle: String = ""
+    @State private var panelDescription: String = ""
     
     var body: some View {
         Form {
@@ -200,10 +202,21 @@ struct SettingsView: View {
             }) {
                 Text("Load Current Title")
             }
+            Section(header: Text("Panel Description")) {
+                TextField("Panel Description", text: $panelDescription, onCommit: {
+                    viewModel.panelDescription = panelDescription
+                })
+            }
+            Button(action: {
+                panelDescription = viewModel.panelDescription
+            }) {
+                Text("Load Current Description")
+            }
         }
         .navigationTitle("Settings")
         .onAppear {
             panelTitle = viewModel.panelTitle
+            panelDescription = viewModel.panelDescription
         }
     }
 }
