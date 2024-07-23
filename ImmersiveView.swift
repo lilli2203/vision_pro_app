@@ -18,7 +18,7 @@ struct ImmersiveView: View {
         .onAppear {
             updatePlaneEntity() // Initial setup
         }
-        .onChange(of: model.flowState) { _,_ in
+        .onChange(of: model.flowState) { _, _ in
             updatePlaneEntity()
             print("Flow state changed, updating plane entity")
         }
@@ -67,9 +67,30 @@ struct ImmersiveView: View {
 // ViewModel to manage flow state
 class ViewModel: ObservableObject {
     @Published var flowState: FlowState = .one
+    @Published var isSettingsPresented = false
+    @Published var selectedImage: String = "panel.png"
     
     enum FlowState {
         case one, two, three
+    }
+    
+    func nextState() {
+        switch flowState {
+        case .one:
+            flowState = .two
+        case .two:
+            flowState = .three
+        case .three:
+            flowState = .one
+        }
+    }
+    
+    func toggleSettings() {
+        isSettingsPresented.toggle()
+    }
+    
+    func updateSelectedImage(imageName: String) {
+        selectedImage = imageName
     }
 }
 
@@ -78,22 +99,63 @@ struct ContentView: View {
     @StateObject private var viewModel = ViewModel()
     
     var body: some View {
-        VStack {
-            ImmersiveView()
-                .environment(viewModel)
-            
-            Picker("Flow State", selection: $viewModel.flowState) {
-                Text("One").tag(ViewModel.FlowState.one)
-                Text("Two").tag(ViewModel.FlowState.two)
-                Text("Three").tag(ViewModel.FlowState.three)
+        NavigationView {
+            VStack {
+                ImmersiveView()
+                    .environment(viewModel)
+                
+                Picker("Flow State", selection: $viewModel.flowState) {
+                    Text("One").tag(ViewModel.FlowState.one)
+                    Text("Two").tag(ViewModel.FlowState.two)
+                    Text("Three").tag(ViewModel.FlowState.three)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+                
+                HStack {
+                    Button("Next State") {
+                        viewModel.nextState()
+                    }
+                    .padding()
+                    
+                    Button("Reset State") {
+                        viewModel.flowState = .one
+                    }
+                    .padding()
+                }
+                
+                Button("Settings") {
+                    viewModel.toggleSettings()
+                }
+                .padding()
             }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding()
-            
-            Button("Reset Flow State") {
-                viewModel.flowState = .one
+            .sheet(isPresented: $viewModel.isSettingsPresented) {
+                SettingsView()
+                    .environment(viewModel)
             }
-            .padding()
+        }
+    }
+}
+
+struct SettingsView: View {
+    @Environment(ViewModel.self) private var viewModel
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Select Image")) {
+                    Picker("Image", selection: $viewModel.selectedImage) {
+                        Text("Panel").tag("panel.png")
+                        Text("Wally").tag("wally.png")
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                }
+                
+                Button("Close Settings") {
+                    viewModel.toggleSettings()
+                }
+            }
+            .navigationTitle("Settings")
         }
     }
 }
