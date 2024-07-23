@@ -14,11 +14,14 @@ class ViewModel: ObservableObject {
         "Panel 3": "Details for Panel 3"
     ]
     @Published var searchText: String = ""
+    @Published var feedbackMessage: String? = nil
+    @Published var arExperience: String = "Box"
     
     func addPanel() {
         let newPanel = "Panel \(panelOptions.count + 1)"
         panelOptions.append(newPanel)
         panelDetails[newPanel] = "Details for \(newPanel)"
+        feedbackMessage = "\(newPanel) added"
     }
     
     func removePanel(at offsets: IndexSet) {
@@ -26,6 +29,7 @@ class ViewModel: ObservableObject {
             let panel = panelOptions[index]
             panelOptions.remove(at: index)
             panelDetails.removeValue(forKey: panel)
+            feedbackMessage = "\(panel) removed"
         }
     }
     
@@ -64,6 +68,12 @@ struct ContentView: View {
                     Text("Clear All Panels")
                 }
                 .padding()
+            }
+            if let feedbackMessage = viewModel.feedbackMessage {
+                Text(feedbackMessage)
+                    .font(.subheadline)
+                    .foregroundColor(.green)
+                    .padding()
             }
         }
     }
@@ -152,28 +162,54 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 struct RealityKitView: UIViewRepresentable {
+    @EnvironmentObject var viewModel: ViewModel
+    
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero)
-        let anchor = try! Experience.loadBox()
-        arView.scene.anchors.append(anchor)
         
-        let box = MeshResource.generateBox(size: 0.1)
-        let material = SimpleMaterial(color: .blue, isMetallic: true)
-        let modelEntity = ModelEntity(mesh: box, materials: [material])
-        let boxAnchor = AnchorEntity(world: [0, 0, -0.5])
-        boxAnchor.addChild(modelEntity)
-        arView.scene.addAnchor(boxAnchor)
+        loadARExperience(into: arView)
         
         return arView
     }
     
-    func updateUIView(_ uiView: ARView, context: Context) {}
+    func updateUIView(_ uiView: ARView, context: Context) {
+        loadARExperience(into: uiView)
+    }
+    
+    private func loadARExperience(into arView: ARView) {
+        arView.scene.anchors.removeAll()
+        
+        switch viewModel.arExperience {
+        case "Box":
+            let anchor = try! Experience.loadBox()
+            arView.scene.anchors.append(anchor)
+            
+            let box = MeshResource.generateBox(size: 0.1)
+            let material = SimpleMaterial(color: .blue, isMetallic: true)
+            let modelEntity = ModelEntity(mesh: box, materials: [material])
+            let boxAnchor = AnchorEntity(world: [0, 0, -0.5])
+            boxAnchor.addChild(modelEntity)
+            arView.scene.addAnchor(boxAnchor)
+            
+        case "Sphere":
+            let sphere = MeshResource.generateSphere(radius: 0.1)
+            let material = SimpleMaterial(color: .red, isMetallic: true)
+            let modelEntity = ModelEntity(mesh: sphere, materials: [material])
+            let sphereAnchor = AnchorEntity(world: [0, 0, -0.5])
+            sphereAnchor.addChild(modelEntity)
+            arView.scene.addAnchor(sphereAnchor)
+            
+        default:
+            break
+        }
+    }
 }
 
 struct ARContentView: View {
     var body: some View {
         RealityKitView()
             .edgesIgnoringSafeArea(.all)
+            .environmentObject(ViewModel())
     }
 }
 
@@ -181,6 +217,7 @@ struct SettingsView: View {
     @EnvironmentObject var viewModel: ViewModel
     
     @State private var panelTitle: String = ""
+    @State private var arExperience: String = "Box"
     
     var body: some View {
         Form {
@@ -194,10 +231,22 @@ struct SettingsView: View {
             }) {
                 Text("Load Current Title")
             }
+            
+            Section(header: Text("AR Experience")) {
+                Picker("AR Experience", selection: $arExperience) {
+                    Text("Box").tag("Box")
+                    Text("Sphere").tag("Sphere")
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .onChange(of: arExperience) { newValue in
+                    viewModel.arExperience = newValue
+                }
+            }
         }
         .navigationTitle("Settings")
         .onAppear {
             panelTitle = viewModel.panelTitle
+            arExperience = viewModel.arExperience
         }
     }
 }
