@@ -50,7 +50,7 @@ struct PanelSelectionView: View {
                                 AsyncImage(url: URL(string: url)) { image in
                                     image.resizable()
                                         .scaledToFit()
-                                        .frame(width: 200, height: 400) // Adjusted height to make images look like panels
+                                        .frame(width: 200, height: 400) 
                                         .clipShape(RoundedRectangle(cornerRadius: 15))
                                         .shadow(radius: 10)
                                         .padding(.vertical, 10)
@@ -59,7 +59,7 @@ struct PanelSelectionView: View {
                                         .zIndex(Double(geometry.frame(in: .global).midX))
                                 } placeholder: {
                                     ProgressView()
-                                        .frame(width: 200, height: 400) // Adjusted placeholder height
+                                        .frame(width: 200, height: 400) 
                                         .background(Color.gray.opacity(0.3))
                                         .clipShape(RoundedRectangle(cornerRadius: 15))
                                         .shadow(radius: 5)
@@ -69,6 +69,9 @@ struct PanelSelectionView: View {
                                     withAnimation {
                                         scrollToCenter(url: url, in: proxy)
                                     }
+                                }
+                                .onLongPressGesture {
+                                    openPanelDetail(url: url)
                                 }
                             }
                             .frame(width: 200, height: 500)
@@ -87,9 +90,9 @@ struct PanelSelectionView: View {
     private func opacity(for xPosition: CGFloat, viewWidth: CGFloat) -> Double {
         let midScreen = viewWidth / 2
         let diffFromCenter = abs(midScreen - xPosition)
-        let maxOpacityDistance: CGFloat = 200 // Adjust this value as needed
-        let minOpacity: Double = 0.2 // Opacity for images not in center
-        let maxOpacity: Double = 1.0 // Opacity for image in center
+        let maxOpacityDistance: CGFloat = 200 
+        let minOpacity: Double = 0.2
+        let maxOpacity: Double = 1.0 
         let opacity = max(minOpacity, maxOpacity - (diffFromCenter / maxOpacityDistance))
         return opacity
     }
@@ -103,7 +106,7 @@ struct PanelSelectionView: View {
     
     private func scrollToCenter(url: String, in proxy: GeometryProxy) {
         guard let index = imageUrls.firstIndex(of: url) else { return }
-        let newOffset = CGFloat(index) * 230 // Adjusted based on the width of each image including the spacing
+        let newOffset = CGFloat(index) * 230 
         scrollOffset = -newOffset + (proxy.size.width - 200) / 2
     }
     
@@ -114,6 +117,88 @@ struct PanelSelectionView: View {
             extendedArray.append(contentsOf: array)
         }
         return extendedArray
+    }
+    
+    private func openPanelDetail(url: String) {
+        model.selectedImageURL = url
+        openWindow(id: "PanelDetailView")
+    }
+}
+
+struct PanelDetailView: View {
+    @Environment(ViewModel.self) private var model
+    @Environment(\.dismissWindow) private var dismissWindow
+    
+    var body: some View {
+        VStack {
+            Text("Panel Details")
+                .font(.largeTitle)
+                .padding()
+            if let url = model.selectedImageURL, let imageUrl = URL(string: url) {
+                AsyncImage(url: imageUrl) { image in
+                    image.resizable()
+                        .scaledToFit()
+                        .frame(width: 300, height: 600)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .shadow(radius: 10)
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 300, height: 600)
+                        .background(Color.gray.opacity(0.3))
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .shadow(radius: 5)
+                }
+            } else {
+                Text("No image available")
+                    .font(.headline)
+            }
+            Spacer()
+            Button(action: {
+                dismissWindow()
+            }) {
+                Text("Close")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+            .padding()
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(radius: 10)
+    }
+}
+
+class ViewModel: ObservableObject {
+    @Published var selectedImageURL: String?
+}
+
+@main
+struct MyApp: App {
+    @StateObject private var viewModel = ViewModel()
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(viewModel)
+        }
+        .windowStyle(.automatic)
+        
+        WindowGroup(id: "PanelDetailView") {
+            PanelDetailView()
+                .environmentObject(viewModel)
+        }
+        .windowStyle(.automatic)
+    }
+}
+
+struct ContentView: View {
+    var body: some View {
+        PanelSelectionView()
+            .environment(ViewModel())
     }
 }
 
